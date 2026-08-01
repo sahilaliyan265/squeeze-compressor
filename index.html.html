@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Squeeze — compress any image under a target size, in your browser</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #EFEEE6;
+    --surface: #FFFFFF;
+    --ink: #1B2420;
+    --ink-soft: #55605A;
+    --accent: #14532D;
+    --accent-bright: #3F8F5C;
+    --line: #D6D3C6;
+    --warn: #B5472A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:0 24px;}
+
+  header{padding:28px 0 0;}
+  .nav{display:flex; align-items:center; justify-content:space-between;}
+  .logo{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:20px; letter-spacing:-0.02em;
+    display:flex; align-items:center; gap:8px;
+  }
+  .logo .dot{width:9px; height:9px; border-radius:50%; background:var(--accent-bright);}
+  .nav a{color:var(--ink-soft); text-decoration:none; font-size:14px;}
+
+  .hero{padding:72px 0 40px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:18px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{content:''; width:16px; height:1px; background:var(--accent);}
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700; letter-spacing:-0.03em;
+    font-size:clamp(34px, 5.2vw, 58px);
+    line-height:1.03;
+    max-width:780px;
+  }
+  h1 em{font-style:normal; color:var(--accent-bright);}
+  .sub{
+    margin-top:20px; font-size:17px; color:var(--ink-soft); max-width:520px;
+  }
+
+  .stage{
+    margin-top:44px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:32px;
+  }
+  .drop{
+    border:1.5px dashed var(--line);
+    border-radius:12px;
+    padding:40px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .drop.drag{border-color:var(--accent-bright); background:#F3FAF5;}
+  .drop-icon{
+    width:44px; height:44px; margin:0 auto 14px;
+    border:1.5px solid var(--ink); border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft);
+  }
+  .drop-title{font-weight:600; font-size:15px;}
+  .drop-sub{font-size:13px; color:var(--ink-soft); margin-top:4px;}
+  input[type=file]{display:none;}
+
+  .target-row{
+    display:flex; align-items:center; gap:14px; margin-top:22px; flex-wrap:wrap;
+  }
+  .target-label{font-size:13px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace;}
+  .target-input{
+    display:flex; align-items:center; gap:6px;
+    border:1px solid var(--line); border-radius:8px; padding:6px 10px;
+    background:var(--bg);
+  }
+  .target-input input{
+    width:60px; border:none; background:none; outline:none;
+    font-family:'IBM Plex Mono', monospace; font-size:14px; color:var(--ink);
+  }
+  .target-input span{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft);}
+
+  .result{display:none; margin-top:28px;}
+  .result.show{display:block;}
+  .compare{display:flex; gap:20px; flex-wrap:wrap;}
+  .panel{flex:1; min-width:220px;}
+  .panel img{width:100%; border-radius:10px; border:1px solid var(--line); display:block; background:#fafaf7;}
+  .panel-meta{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:10px; font-family:'IBM Plex Mono', monospace; font-size:13px;
+  }
+  .panel-label{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spacing:.05em;}
+  .size-big{font-size:16px; font-weight:500;}
+  .size-big.warn{color:var(--warn);}
+  .size-big.ok{color:var(--accent);}
+
+  .savings{
+    margin-top:20px; padding:14px 18px; background:#F3FAF5; border:1px solid #CFE6D6;
+    border-radius:10px; font-family:'IBM Plex Mono', monospace; font-size:14px;
+    color:var(--accent); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .download{
+    background:var(--ink); color:#fff; border:none; padding:8px 16px;
+    border-radius:8px; font-family:'Inter'; font-size:13px; font-weight:600;
+    cursor:pointer;
+  }
+  .status{
+    margin-top:16px; font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft);
+  }
+
+  .feature-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden;
+    margin-top:80px;
+  }
+  .feature{background:var(--surface); padding:28px 22px;}
+  .feature-num{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--accent-bright); margin-bottom:12px;}
+  .feature h3{font-family:'Space Grotesk', sans-serif; font-size:17px; font-weight:500; margin-bottom:8px;}
+  .feature p{font-size:14px; color:var(--ink-soft);}
+
+  footer{
+    margin-top:80px; padding:32px 0 48px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  }
+  footer p{font-size:13px; color:var(--ink-soft);}
+
+  @media (max-width:640px){
+    .feature-grid{grid-template-columns:1fr;}
+    .compare{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="nav">
+      <div class="logo"><span class="dot"></span>squeeze</div>
+      <a href="#how">koi upload nahi, sab kuch aapke browser mein</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">100% client-side compression</div>
+    <h1>Apni image ko <em>exact size</em> tak compress karo — bina server pe bheje.</h1>
+    <p class="sub">Koi upload nahi, koi account nahi. Compression aapke apne browser mein hoti hai, isliye aapki image kabhi kisi server tak nahi jaati.</p>
+
+    <div class="stage">
+      <label class="drop" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*">
+        <div class="drop-icon">IMG</div>
+        <div class="drop-title">Image yahan drop karo, ya click karke choose karo</div>
+        <div class="drop-sub">JPG, PNG, WebP — sab supported</div>
+      </label>
+
+      <div class="target-row">
+        <span class="target-label">TARGET SIZE</span>
+        <div class="target-input">
+          <input type="number" id="targetKb" value="100" min="5" max="5000">
+          <span>KB</span>
+        </div>
+      </div>
+
+      <div class="status" id="status"></div>
+
+      <div class="result" id="result">
+        <div class="compare">
+          <div class="panel">
+            <div class="panel-label">Original</div>
+            <img id="origImg" alt="Original image">
+            <div class="panel-meta">
+              <span>original</span>
+              <span class="size-big warn" id="origSize">—</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Compressed</div>
+            <img id="compImg" alt="Compressed image">
+            <div class="panel-meta">
+              <span>squeeze output</span>
+              <span class="size-big ok" id="compSize">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="savings">
+          <span id="savingsText">—</span>
+          <button class="download" id="downloadBtn">Download</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature-grid" id="how">
+    <div class="feature">
+      <div class="feature-num">01</div>
+      <h3>Kabhi server pe upload nahi hoti</h3>
+      <p>Poora compression Canvas API se browser ke andar hota hai. Client work ya personal photos ke liye safe.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">02</div>
+      <h3>Exact target size</h3>
+      <p>Sirf "compress" nahi — aap batao 100KB, 200KB, jo bhi chahiye, tool quality automatically adjust karke wahan tak pohanchta hai.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">03</div>
+      <h3>Bulk aur API — jald aa raha hai</h3>
+      <p>Ek waqt mein sainkron images, ya seedha apni site/app se connect karne ke liye API — paid tier mein.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>squeeze — browser-only image compression.</p>
+    <p>Made for developers, sellers, agencies who care about speed and privacy.</p>
+  </footer>
+
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const status = document.getElementById('status');
+const result = document.getElementById('result');
+const origImg = document.getElementById('origImg');
+const compImg = document.getElementById('compImg');
+const origSize = document.getElementById('origSize');
+const compSize = document.getElementById('compSize');
+const savingsText = document.getElementById('savingsText');
+const downloadBtn = document.getElementById('downloadBtn');
+const targetKbInput = document.getElementById('targetKb');
+
+let compressedBlobUrl = null;
+let compressedFilename = 'squeezed-image.jpg';
+
+['dragenter','dragover'].forEach(evt=>{
+  dropZone.addEventListener(evt, e=>{ e.preventDefault(); dropZone.classList.add('drag'); });
+});
+['dragleave','drop'].forEach(evt=>{
+  dropZone.addEventListener(evt, e=>{ e.preventDefault(); dropZone.classList.remove('drag'); });
+});
+dropZone.addEventListener('drop', e=>{
+  const file = e.dataTransfer.files[0];
+  if(file) handleFile(file);
+});
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file) handleFile(file);
+});
+
+function fmtSize(bytes){
+  return (bytes/1024).toFixed(1) + ' KB';
+}
+
+async function handleFile(file){
+  if(!file.type.startsWith('image/')){
+    status.textContent = 'Sirf image files supported hain.';
+    return;
+  }
+  status.textContent = 'Compressing…';
+  result.classList.remove('show');
+
+  const targetBytes = (parseInt(targetKbInput.value) || 100) * 1024;
+  const origUrl = URL.createObjectURL(file);
+  origImg.src = origUrl;
+  origSize.textContent = fmtSize(file.size);
+
+  const img = await loadImage(origUrl);
+  const { blob, quality, scale } = await compressToTarget(img, targetBytes);
+
+  if(compressedBlobUrl) URL.revokeObjectURL(compressedBlobUrl);
+  compressedBlobUrl = URL.createObjectURL(blob);
+  compImg.src = compressedBlobUrl;
+  compSize.textContent = fmtSize(blob.size);
+  compressedFilename = 'squeezed-' + (file.name.replace(/\.[^.]+$/, '') || 'image') + '.jpg';
+
+  const saved = Math.max(0, Math.round((1 - blob.size/file.size)*100));
+  const underTarget = blob.size <= targetBytes;
+  savingsText.textContent = underTarget
+    ? `${saved}% chhoti — target ke andar (quality ${(quality*100).toFixed(0)}%)`
+    : `${saved}% chhoti — target se thodi zyada hai (image bohot detailed hai)`;
+
+  status.textContent = '';
+  result.classList.add('show');
+}
+
+function loadImage(url){
+  return new Promise(res=>{
+    const img = new Image();
+    img.onload = ()=>res(img);
+    img.src = url;
+  });
+}
+
+async function compressToTarget(img, targetBytes){
+  let scale = 1;
+  let quality = 0.9;
+  let blob = await canvasToBlob(img, scale, quality);
+
+  // Binary search on quality first
+  let lo = 0.05, hi = 0.95;
+  for(let i=0; i<7; i++){
+    quality = (lo+hi)/2;
+    blob = await canvasToBlob(img, scale, quality);
+    if(blob.size > targetBytes){ hi = quality; } else { lo = quality; }
+  }
+
+  // If still too big even at low quality, downscale dimensions and retry
+  let attempts = 0;
+  while(blob.size > targetBytes && scale > 0.2 && attempts < 6){
+    scale *= 0.8;
+    lo = 0.05; hi = 0.95;
+    for(let i=0; i<6; i++){
+      quality = (lo+hi)/2;
+      blob = await canvasToBlob(img, scale, quality);
+      if(blob.size > targetBytes){ hi = quality; } else { lo = quality; }
+    }
+    attempts++;
+  }
+
+  return { blob, quality: lo, scale };
+}
+
+function canvasToBlob(img, scale, quality){
+  return new Promise(resolve=>{
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(img.width * scale));
+    canvas.height = Math.max(1, Math.round(img.height * scale));
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(b=>resolve(b), 'image/jpeg', quality);
+  });
+}
+
+downloadBtn.addEventListener('click', ()=>{
+  if(!compressedBlobUrl) return;
+  const a = document.createElement('a');
+  a.href = compressedBlobUrl;
+  a.download = compressedFilename;
+  a.click();
+});
+</script>
+</body>
+</html>
