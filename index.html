@@ -152,21 +152,21 @@
   <header>
     <div class="nav">
       <div class="logo"><span class="dot"></span>squeeze</div>
-      <a href="#how">koi upload nahi, sab kuch aapke browser mein</a>
+      <a href="#how">no uploads, everything runs in your browser</a>
     </div>
   </header>
 
   <section class="hero">
     <div class="eyebrow">100% client-side compression</div>
-    <h1>Apni image ko <em>exact size</em> tak compress karo — bina server pe bheje.</h1>
-    <p class="sub">Koi upload nahi, koi account nahi. Compression aapke apne browser mein hoti hai, isliye aapki image kabhi kisi server tak nahi jaati.</p>
+    <h1>Compress your image to an <em>exact size</em> — without sending it to any server.</h1>
+    <p class="sub">No uploads, no account needed. Compression happens right in your own browser, so your image never leaves your device.</p>
 
     <div class="stage">
       <label class="drop" id="dropZone">
         <input type="file" id="fileInput" accept="image/*">
         <div class="drop-icon">IMG</div>
-        <div class="drop-title">Image yahan drop karo, ya click karke choose karo</div>
-        <div class="drop-sub">JPG, PNG, WebP — sab supported</div>
+        <div class="drop-title">Drop an image here, or click to choose one</div>
+        <div class="drop-sub">JPG, PNG, WebP — all supported</div>
       </label>
 
       <div class="target-row">
@@ -209,18 +209,18 @@
   <section class="feature-grid" id="how">
     <div class="feature">
       <div class="feature-num">01</div>
-      <h3>Kabhi server pe upload nahi hoti</h3>
-      <p>Poora compression Canvas API se browser ke andar hota hai. Client work ya personal photos ke liye safe.</p>
+      <h3>Never uploaded to a server</h3>
+      <p>All compression happens inside your browser using the Canvas API. Safe for client work or personal photos.</p>
     </div>
     <div class="feature">
       <div class="feature-num">02</div>
       <h3>Exact target size</h3>
-      <p>Sirf "compress" nahi — aap batao 100KB, 200KB, jo bhi chahiye, tool quality automatically adjust karke wahan tak pohanchta hai.</p>
+      <p>Not just "compress" — tell it 100KB, 200KB, whatever you need, and the tool automatically adjusts quality to hit that target.</p>
     </div>
     <div class="feature">
       <div class="feature-num">03</div>
-      <h3>Bulk aur API — jald aa raha hai</h3>
-      <p>Ek waqt mein sainkron images, ya seedha apni site/app se connect karne ke liye API — paid tier mein.</p>
+      <h3>Bulk & API — coming soon</h3>
+      <p>Compress hundreds of images at once, or connect directly from your own site or app via API — in the paid tier.</p>
     </div>
   </section>
 
@@ -268,7 +268,7 @@ function fmtSize(bytes){
 
 async function handleFile(file){
   if(!file.type.startsWith('image/')){
-    status.textContent = 'Sirf image files supported hain.';
+    status.textContent = 'Only image files are supported.';
     return;
   }
   status.textContent = 'Compressing…';
@@ -291,8 +291,8 @@ async function handleFile(file){
   const saved = Math.max(0, Math.round((1 - blob.size/file.size)*100));
   const underTarget = blob.size <= targetBytes;
   savingsText.textContent = underTarget
-    ? `${saved}% chhoti — target ke andar (quality ${(quality*100).toFixed(0)}%)`
-    : `${saved}% chhoti — target se thodi zyada hai (image bohot detailed hai)`;
+    ? `${saved}% smaller — within target (quality ${(quality*100).toFixed(0)}%)`
+    : `${saved}% smaller — slightly above target (image is very detailed)`;
 
   status.textContent = '';
   result.classList.add('show');
