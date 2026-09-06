@@ -1,0 +1,47 @@
+# Local environments and generated runtime state
+.freebuff/
+__pycache__/
+.pytest_cache/
+.venv/
+.venv_audit_test/
+node_modules/
+.next/
+*.pyc
+
+# Local secrets and environment files
+.env
+.env.local
+.env.*.local
+
+# Experiments, benchmarks, QA fixtures, and audit workspaces
+experiments/
+audit_tmp/
+benchmark_human/
+squeeze-qa/
+test_images/
+
+# Generated audit reports and temporary diagnostics
+FINAL_VALIDATION_REPORT.md
+FULL_SITE_DEEP_AUDIT_20260905.json
+FULL_SITE_DEEP_AUDIT_20260905.md
+OCR_FORENSIC_AUDIT_FINDINGS.md
+OCR_NEURAL_DEPENDENCY_FORENSIC_AUDIT.md
+OCR_VALIDATION_FINAL_REPORT.md
+OCR_VALIDATION_REPORT.txt
+audit_report.md
+phase1_extracted_text.txt
+phase1_response.json
+phase2_engine_check.py
+phase3_5_quality_assessment.py
+phase6_8_analysis.py
+phase9_final_report.py
+diagnostic_ocr.py
+phase1_ocr_test.py
+test_results.json
+
+# Generated logs and reports
+*.log
+*_REPORT.md
+*_report.md
+*_results.json
+output.txt
